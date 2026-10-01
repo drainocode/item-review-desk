@@ -40,3 +40,7 @@ npm run agent:draft -- data/proposals.example.json
 ```
 
 Tests: `npm test` (workflow and lint rules).
+
+## Loading the sample content without the Sanity CLI
+
+Add two repository secrets, `SANITY_PROJECT_ID` and `SANITY_WRITE_TOKEN` (an Editor token), then run the **Import sample content into Sanity** workflow from the Actions tab. It sends `seed.ndjson` to your dataset with `scripts/import-seed.mjs`.
