@@ -1,0 +1,32 @@
+{
+  "name": "item-review-desk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test lib/*.test.ts",
+    "agent:draft": "node --experimental-strip-types scripts/agent-draft.ts",
+    "seed:ndjson": "node --experimental-strip-types scripts/make-seed.ts"
+  },
+  "dependencies": {
+    "@sanity/client": "^7.26.2",
+    "@sanity/ui": "^3",
+    "groq-js": "^2.0.0",
+    "next": "^16",
+    "next-sanity": "^13.3.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.9"
+  }
+}

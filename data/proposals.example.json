@@ -1,0 +1,26 @@
+[
+  {
+    "examId": "exam-cca1",
+    "objectiveId": "obj-cs-1-4",
+    "cognitiveLevel": "apply",
+    "stem": "A chat customer's issue is fixed. Which closing message is most likely to prevent a repeat contact?",
+    "options": [
+      {"text": "Your refund of 20 pounds is approved and will reach your card within 5 working days. Is there anything else I can help with?", "isCorrect": true},
+      {"text": "All done! Have a great day!", "whyWrong": "Friendly, but it gives no detail on what happens next."},
+      {"text": "The refund is processing and should arrive in due course.", "whyWrong": "No timescale, so the customer is likely to chase."},
+      {"text": "Please rate this chat after you close the window.", "whyWrong": "A survey request is not a close; it skips the outcome."}
+    ],
+    "rationale": "Stating the outcome, amount and timescale, then checking for anything else, closes the loop and heads off 'where is my refund?' contacts."
+  },
+  {
+    "examId": "exam-cca1",
+    "objectiveId": "obj-cs-1-2",
+    "stem": "Which of these is not a de-escalation technique?",
+    "options": [
+      {"text": "Lowering your speaking pace"},
+      {"text": "Arguing the facts", "isCorrect": true},
+      {"text": "None of the above"}
+    ],
+    "rationale": "Arguing raises tension."
+  }
+]
