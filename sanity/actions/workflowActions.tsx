@@ -1,15 +1,17 @@
 'use client'
 import {useState} from 'react'
 import {Button, Card, Stack, Text, TextArea} from '@sanity/ui'
-import {useCurrentUser, useDocumentOperation, type DocumentActionComponent, type DocumentActionProps} from 'sanity'
+import {useClient, useCurrentUser, type DocumentActionComponent, type DocumentActionProps} from 'sanity'
 import {TRANSITIONS, check, buildPatch, type ItemState, type Transition} from '../../lib/workflow'
 import {lintItem, errorCount, type ItemLike} from '../../lib/lint'
+import {apiVersion} from '../env'
 
 type ItemDoc = ItemLike & {state?: ItemState; author?: string}
 
 function makeAction(t: Transition): DocumentActionComponent {
   const Action: DocumentActionComponent = (props: DocumentActionProps) => {
-    const {patch, publish} = useDocumentOperation(props.id, props.type)
+    const client = useClient({apiVersion})
+    const [busy, setBusy] = useState(false)
     const user = useCurrentUser()
     const [open, setOpen] = useState(false)
     const [note, setNote] = useState('')
@@ -29,11 +31,32 @@ function makeAction(t: Transition): DocumentActionComponent {
         return
       }
       const p = buildPatch(req, result.transition)
-      patch.execute([{setIfMissing: {log: []}}, {set: p.set}, {insert: {after: 'log[-1]', items: [p.append]}}])
-      // Approved, retired and reopened states should be visible to the practice site straight away.
-      if (!publish.disabled) publish.execute()
-      setOpen(false)
-      props.onComplete()
+      // Write the transition straight to the published document in one transaction.
+      // (An earlier version patched the draft and then called publish in the same tick;
+      // publish was still disabled at that moment, so the change stayed an unpublished draft.)
+      const base = (props.draft ?? props.published) as (Record<string, unknown> & {log?: unknown[]}) | null
+      if (!base) return
+      const {_rev, _updatedAt, ...rest} = base as Record<string, unknown>
+      void _rev
+      void _updatedAt
+      const next = {
+        ...rest,
+        ...p.set,
+        _id: props.id,
+        _type: props.type,
+        log: [...((base.log as unknown[]) ?? []), p.append],
+      }
+      const tx = client.transaction().createOrReplace(next as {_id: string; _type: string})
+      if (props.draft) tx.delete(`drafts.${props.id}`)
+      setBusy(true)
+      tx.commit()
+        .then(() => {
+          setOpen(false)
+          props.onComplete()
+        })
+        .catch((err: Error) => setError(err.message))
+        .finally(() => setBusy(false))
+      return
     }
 
     const blocked = t.needsCleanLint && lintErrors > 0
@@ -58,7 +81,7 @@ function makeAction(t: Transition): DocumentActionComponent {
                 <Text size={1}>{error}</Text>
               </Card>
             )}
-            <Button text={t.label} tone="primary" onClick={run} />
+            <Button text={busy ? 'Saving...' : t.label} tone="primary" disabled={busy} onClick={run} />
           </Stack>
         ),
       },
