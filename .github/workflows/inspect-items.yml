@@ -1,0 +1,21 @@
+name: Inspect items (and optionally publish stuck drafts)
+on:
+  workflow_dispatch:
+    inputs:
+      publish_drafts:
+        description: Publish any item drafts
+        type: boolean
+        default: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/inspect-items.mjs ${{ inputs.publish_drafts && '--publish-drafts' || '' }}
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: production
+          SANITY_WRITE_TOKEN: ${{ secrets.SANITY_WRITE_TOKEN }}
