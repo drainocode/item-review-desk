@@ -9,10 +9,14 @@ const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/
 const q = encodeURIComponent('*[_type == "item"] | order(_id asc)')
 const res = await fetch(`${base}/query/${dataset}?query=${q}&perspective=raw`, {headers})
 const {result} = await res.json()
+const lines = []
 for (const d of result) {
   const last = (d.log || []).at(-1)
-  console.log(`${d._id.padEnd(22)} state=${d.state}  last=${last ? `${last.from}->${last.to} by ${last.actor}` : '-'}`)
+  const line = `${d._id} state=${d.state} last=${last ? `${last.from}->${last.to} by ${last.actor}` : '-'}`
+  console.log(line)
+  lines.push(line)
 }
+console.log(`::notice title=items::${lines.join(' | ')}`)
 if (process.argv.includes('--publish-drafts')) {
   const drafts = result.filter((d) => d._id.startsWith('drafts.'))
   const mutations = []
@@ -23,5 +27,5 @@ if (process.argv.includes('--publish-drafts')) {
   }
   if (!mutations.length) { console.log('No drafts to publish'); process.exit(0) }
   const r = await fetch(`${base}/mutate/${dataset}`, {method: 'POST', headers, body: JSON.stringify({mutations})})
-  console.log('publish drafts:', r.status, JSON.stringify(await r.json()).slice(0, 300))
+  console.log(`::notice title=publish::${r.status} ${JSON.stringify(await r.json()).slice(0, 300)}`)
 }
